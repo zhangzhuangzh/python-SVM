@@ -1,0 +1,68 @@
+import numpy as np
+from sklearn import svm
+
+f = open("E:\code\python\C1.txt")
+line = f.readline()
+i = 0
+X = [[0.0]*12]*307
+Y = [0.0]*307
+
+while line:
+    # print(line)
+    # print (line)
+    a = line.split()
+    a = np.array(a)
+    a = a.astype(np.float)
+    # print (len(a))
+
+    for j in range(0, 12):
+        X[i][j] = a[j]
+
+    Y[i] = a[12]
+    # print("Y[i]", i, Y[i])
+    # print (a[12])
+    # print (Y[i])
+    i = i+1
+    # break
+    line = f.readline()
+f.close()
+
+
+# print (i)
+# print (X)
+# print (Y)
+# X = [[0, 0], [2, 2]]
+# y = [0.5, 2.5]
+
+trainX = [[0.0]*12]*257
+trainY = [0.0]*257
+for i in range(0, 257):
+    trainY[i] = Y[i]
+    for j in range(0, 12):
+        trainX[i][j] = X[i][j]
+
+preX = [[0.0]*12]*50
+relY = [0.0]*50
+preY = [0.0]*50
+for i in range(0, 50):
+    relY[i] = Y[i + 257]
+    # print (i + 257, Y[i + 257])
+    # print ("relY ", i, relY[i])
+    for j in range(0, 12):
+        preX[i][j] = X[i + 257][j]
+# trainX and trainY is correct
+# relY is error
+# print (relY)
+
+clf = svm.SVR(kernel='rbf', C=1e3, gamma=0.1)
+clf.fit(trainX, trainY)
+# print ("result=")
+preY = clf.predict(preX)
+# print (clf.predict(preX))
+# print (preY)
+
+totalError = 0.0
+for i in range(0, 50):
+    # print (relY[i], preY[i])
+    totalError += abs(relY[i] - preY[i])
+print("error = ", totalError/50)
