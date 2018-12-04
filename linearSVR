@@ -1,0 +1,68 @@
+import numpy as np
+from sklearn import svm
+
+# 所有的数据数
+all_line = 1000
+# 测试集个数
+all_test = 200
+# 训练集个数
+all_train = all_line - all_test
+# 测试集元素个数
+all_test_num = 63
+
+
+f = open("E:\code\python\C2_TRAINING_SET.txt")
+line = f.readline()
+i = 0
+X = [([0.0] * all_test_num) for i in range(all_line)]
+Y = [0.0]*all_line
+
+while line:
+    # print(line)
+    # print (line)
+    a = line.split()
+    a = np.array(a)
+    a = a.astype(np.float)
+    # print (len(a))
+
+    for j in range(0, all_test_num):
+        X[i][j] = a[j]
+
+    Y[i] = a[all_test_num]
+    i = i+1
+    line = f.readline()
+f.close()
+
+trainX = [([0.0] * all_test_num) for i in range(all_train)]
+trainY = [0.0]*all_train
+for i in range(0, all_train):
+    trainY[i] = Y[i]
+    for j in range(0, all_test_num):
+        trainX[i][j] = X[i][j]
+
+preX = [([0.0] * all_test_num) for i in range(all_test)]
+relY = [0.0]*all_test
+preY = [0.0]*all_test
+for i in range(0, all_test):
+    relY[i] = Y[i + all_train]
+    for j in range(0, all_test_num):
+        preX[i][j] = X[i + all_train][j]
+
+# clf = svm.SVR(kernel='rbf', C=20, gamma='scale')
+clf = svm.LinearSVR(epsilon=0.0, tol=0.00000001, C=0.1, loss='epsilon_insensitive',
+                    fit_intercept=True, intercept_scaling=0.00001, dual=True, verbose=0, random_state=None, max_iter=800) # 0.0138
+# clf = svm.NuSVR() #0.021
+# clf = svm.SVR(kernel='poly', C=5000, degree=2)
+# clf = svm.SVR(C=1.0, coef0=0.0, degree=3, epsilon=0.2, gamma='auto',
+#               kernel='linear', max_iter=-1, shrinking=True, tol=0.001, verbose=False)
+clf.fit(trainX, trainY)
+# print ("result=")
+preY = clf.predict(preX)
+# print (clf.predict(preX))
+# print (preY)
+
+totalError = 0.0
+for i in range(0, all_test):
+    print ("real=", relY[i], "    predict=", preY[i])
+    totalError += abs(relY[i] - preY[i])
+print("mean abs error = ", totalError/all_test)
